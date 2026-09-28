@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Result Portal</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      background-color: #f4f6f9;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .card {
+      background: #ffffff;
+      width: 100%;
+      max-width: 400px;
+      padding: 32px 24px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      text-align: center;
+    }
+    h2 {
+      color: #1a1a1a;
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+    }
+    p.subtitle {
+      color: #666;
+      font-size: 0.9rem;
+      margin-bottom: 24px;
+    }
+    .input-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #444;
+      margin-bottom: 6px;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 14px;
+      font-size: 1rem;
+      border: 1.5px solid #d1d5db;
+      border-radius: 10px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input[type="text"]:focus {
+      border-color: #2563eb;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      background-color: #2563eb;
+      color: #ffffff;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    button:hover {
+      background-color: #1d4ed8;
+    }
+    #status {
+      margin-top: 16px;
+      font-size: 0.9rem;
+      color: #dc2626;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>Result Portal</h2>
+    <p class="subtitle">Enter your roll number below to view your PDF document.</p>
+    
+    <div class="input-group">
+      <label for="rollNumber">Roll Number</label>
+      <input type="text" id="rollNumber" placeholder="e.g. 101" required>
+    </div>
+
+    <button onclick="fetchResult()">Submit</button>
+
+    <div id="status"></div>
+  </div>
+
+  <script>
+    function fetchResult() {
+      const roll = document.getElementById('rollNumber').value.trim();
+      const statusDiv = document.getElementById('status');
+      
+      // Update with your published Google Apps Script Web App URL
+      const scriptUrl = "https://script.google.com/macros/s/AKfycbyl5FcAl_ag2QmGwYfs5QOZFflcfDRrYVhzeTiR5mXcUnGYMfoOqhvOg1q4qGx77zeg/exec";  
+
+      if (!roll) {
+        statusDiv.style.color = "#dc2626";
+        statusDiv.innerText = "Please enter a valid roll number.";
+        return;
+      }
+
+      statusDiv.style.color = "#2563eb";
+      statusDiv.innerText = "Searching... Please wait.";
+
+      fetch(`${scriptUrl}?roll=${encodeURIComponent(roll)}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === "success" && data.pdfUrl) {
+            statusDiv.style.color = "#16a34a";
+            statusDiv.innerText = "Match found! Redirecting...";
+            window.location.href = data.pdfUrl;
+          } else {
+            statusDiv.style.color = "#dc2626";
+            statusDiv.innerText = data.message || "Roll number not found.";
+          }
+        })
+        .catch(error => {
+          console.error("Error:", error);
+          statusDiv.style.color = "#dc2626";
+          statusDiv.innerText = "Error fetching result. Check connection.";
+        });
+    }
+  </script>
+
+</body>
+</html>
